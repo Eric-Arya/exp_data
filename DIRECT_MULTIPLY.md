@@ -35,6 +35,18 @@ with the larger multipliers becoming almost completely repetitive.
 | 1.50x | 99.5% | 198 | not run on IFEval |
 | 2.00x | 100.0% | 200 | not run on IFEval |
 
+## Scale of the learned SN-Tune update
+
+The raw SN-Tune `alpha=1` checkpoint changes 9,621,471 selected weight coordinates. On those
+coordinates, the original weights have mean absolute value `0.011394`, while the learned signed
+delta has mean absolute value `0.00004643`: only **0.407%** of the original mean absolute weight.
+The relative L2 norm is **0.303%**. The median absolute delta is `0.00004984` and the maximum is
+`0.00009797`; the tuned weights' mean absolute value remains `0.011395`.
+
+Thus SN-Tune succeeds through small, signed, distributed weight updates. These ratios are not an
+activation multiplier: directly multiplying every selected activation by 1.05x or more is a much
+coarser intervention and does not reproduce the learned update.
+
 ## Conclusion
 
 Unsigned amplification is not a safety intervention for either neuron set. NeurIPS-ranked neurons
