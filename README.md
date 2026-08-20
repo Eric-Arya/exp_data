@@ -14,6 +14,7 @@ This directory evaluates reproduced baselines and interventions on frozen, share
 | `sn` | Llama-3-8B-Instruct SN-Tune merged checkpoint at delta scale `alpha=8` |
 | `sn_direct` | Unmodified Llama-3 with raw-detected SN-Tune activation dimensions directly strengthened, without fine-tuning |
 | `neurips` | Llama-2-7B Base dynamically patched from the DPO guide at the top 20,000 safety neurons |
+| `neurips_direct` | Unmodified Llama-2-7B Base with the NeurIPS-ranked post-MLP activation dimensions directly multiplied |
 | `neurips_dpo` | NeurIPS Llama-2 SFT+DPO guide without dynamic neuron patching |
 
 HarmBench uses the exact NeurIPS seed-42 200/400 manifest and 128-token greedy decoding. It reports both the case-sensitive `llm-attacks` refusal-substring ASR and mean `beaver-7b-v1.0-cost`. Capability evaluation is unified across model families by default: GSM8K uses the first 100 test rows, zero-shot chat prompting, greedy decoding, a 256-token limit, and flexible deterministic numeric exact match (final `####`, explicit final-answer phrase, final equation RHS, then last-number fallback); MMLU uses the seed-112 balanced 285-example subset, five-shot multi-turn chat prompting, and constrained next-token A/B/C/D scoring. Llama-3 uses its native chat template and Llama-2 uses Tulu serialization. The released Llama-2 paper protocol remains available explicitly with `--neurips-capability-protocol paper`.
@@ -133,13 +134,24 @@ CUDA_VISIBLE_DEVICES=0 python -m unified_eval.runner run --method grad \
   --grad-top-k 50 --grad-strength 0.75 --harmbench-batch-size 8
 ```
 
-Directly strengthen the ranked raw SN-Tune cap-25 mask at every token position. As with Grad,
-`strength=s` means multiplier `1+s`; safety prompting remains raw by default:
+Directly scale the ranked raw SN-Tune cap-25 mask at every token position. Here
+`strength=s` means multiplier `1+s`, so attenuation is available with `-1 < s < 0`; safety
+prompting remains raw by default. The benchmarked defaults are batch 32 for HarmBench and IFEval:
 
 ```bash
 CUDA_VISIBLE_DEVICES=0 python -m unified_eval.runner run --method sn_direct \
-  --run-name sn_direct_raw_cap25_s0p05 --tasks harmbench gsm8k mmlu \
-  --sn-direct-strength 0.05 --llama3-harm-prompt-format raw
+  --run-name sn_direct_raw_cap25_m0p95 --tasks harmbench ifeval \
+  --sn-direct-strength -0.05 --llama3-harm-prompt-format raw
+```
+
+Directly scale the NeurIPS top-20k post-MLP activation pool at all token positions. The multiplier
+is specified directly; raw HarmBench prompting is enforced for this diagnostic. The benchmarked
+defaults are batch 32 for HarmBench and batch 16 for full-length IFEval:
+
+```bash
+CUDA_VISIBLE_DEVICES=0 python -m unified_eval.runner run --method neurips_direct \
+  --run-name neurips_direct_top20k_m1p2 --tasks harmbench ifeval \
+  --neurips-direct-multiplier 1.2
 ```
 
 Outputs are resumable and configuration-fingerprinted under `results/<method>/`. The cross-method files are `results/unified_summary.json` and `results/unified_summary.csv`. The already completed and checksum-verified NeurIPS HarmBench patched condition is reused by default when its exact 200-row/128-token/top-20,000 configuration is requested; pass `--no-reuse-neurips-harm-cache` to regenerate it.

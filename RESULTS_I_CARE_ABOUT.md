@@ -117,6 +117,20 @@ The main-only figure omits Grad off-policy and adds the held-out, raw-corpus IA3
 | Grad (on-policy) | `K=1943, strength=2` | 4,000 | Separate | 6.5% | 41.0% | 49.36% | 45.5% | 53.21% |
 | Grad (on-policy) | `K=1943, strength=2.5` | 4,000 | Separate | 4.5% | 19.5% | 33.01% | 23.0% | 35.90% |
 
+The new K=4000 on-policy strength sweep uses the same 20,000-candidate ranking,
+positive-only direction, final-token scope, and FP32 protocol:
+
+| Strength | HarmBench ASR ↓ | IFEval strict prompt ↑ | Strict instruction ↑ | Loose prompt ↑ | Loose instruction ↑ |
+|---:|---:|---:|---:|---:|---:|
+| 0.4 | 22.0% | 67.0% | 77.24% | 74.0% | 83.01% |
+| 0.5 | 18.5% | 66.0% | 75.96% | 75.5% | 83.33% |
+| **0.6** | **15.0%** | **69.5%** | **78.21%** | **77.5%** | **85.26%** |
+| **0.75** | **8.5%** | **66.5%** | **75.64%** | **75.0%** | **82.05%** |
+| **0.85** | **6.0%** | **62.5%** | **73.40%** | **74.0%** | **81.41%** |
+
+Strength 0.6 strictly dominates the old K=1000,s=1 point, and strength 0.75
+strictly dominates K=2000,s=1 on both HarmBench ASR and strict-prompt IFEval.
+
 Matched GSM8K-100 results are now complete for every point in the main-only figure.
 All were generated with the current strict FP32 protocol (TF32 disabled), identical
 zero-shot Llama-3 chat prompts, greedy decoding, a 256-token limit, and the flexible numeric
@@ -145,3 +159,9 @@ exact-match scorer. Existing runs used batch size 32; the new IA3-SFT runs used 
 ![Main IFEval–HarmBench trade-off trajectories](figures/ifeval_harmbench_tradeoff_main_only.png)
 
 ![Main GSM8K–HarmBench trade-off trajectories](figures/gsm8k_harmbench_tradeoff_main_only.png)
+
+MATH-500 L1-L3 n=100 is now complete for every point in the current main-only
+figure. See `MATH500_L1_L3_N100_EXPERIMENT_REPORT.md` for the table and
+`ORDERED_MATH_GRAD_SN_NEURIPS_SWEEP_REPORT.md` for the full ordered sweep.
+
+![Main MATH–HarmBench trade-off trajectories](figures/math500_harmbench_tradeoff_main_only.png)

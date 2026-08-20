@@ -12,7 +12,8 @@ normalized level allocation as the original subset:
 | 2 | 90 | 37.82% | 38 | 38% |
 | 3 | 105 | 44.12% | 44 | 44% |
 
-Six Llama-3-8B-Instruct conditions were evaluated:
+The first six Llama-3-8B-Instruct conditions were evaluated as the focused
+paired analysis below:
 
 1. Unmodified baseline.
 2. Grad on-policy expanded ranking at K=1000, K=2000, and K=4000, with
@@ -29,7 +30,46 @@ runs used physical GPU 1. Batch 16 was reused from the existing real-prompt
 MATH-500 benchmark and is now the runner default. Scoring used deterministic
 `math_verify` symbolic equivalence, not an LLM judge.
 
-## Results
+The evaluation was subsequently completed for every point in the
+`ifeval_harmbench_tradeoff_main_only.png` figure. This added the 12 previously
+missing points: SN-Tune alpha 1/4/8, IA3-SFT alpha 1/1.5/2/2.5/3.5, and IA3
+guide-patch K=40k/80k/160k/320k. Before the first guide-patch MATH run, a
+real-prompt batch benchmark tested 8, 16, and 32; batch 32 was fastest at 16.98
+examples/s with 44.87 GiB peak allocation. This method-specific default is now
+encoded in the runner. All other MATH conditions retain the previously
+benchmarked batch 16 default.
+
+## Complete main-only coverage
+
+| Condition | HarmBench ASR ↓ | MATH correct | MATH accuracy ↑ |
+|---|---:|---:|---:|
+| Baseline | 65.5% | 48/100 | 48% |
+| SN-Tune alpha 1 | 62.5% | 53/100 | 53% |
+| SN-Tune alpha 4 | 20.0% | 45/100 | 45% |
+| SN-Tune alpha 6 | 1.0% | 46/100 | 46% |
+| SN-Tune alpha 8 | 0.5% | 46/100 | 46% |
+| IA3-SFT alpha 1 | 44.5% | 50/100 | 50% |
+| IA3-SFT alpha 1.5 | 33.5% | 45/100 | 45% |
+| IA3-SFT alpha 2 | 24.5% | 43/100 | 43% |
+| IA3-SFT alpha 2.5 | 16.0% | 43/100 | 43% |
+| IA3-SFT alpha 3 | 8.0% | 45/100 | 45% |
+| IA3-SFT alpha 3.5 | 6.5% | 48/100 | 48% |
+| IA3 guide patch K=40k | 22.0% | 43/100 | 43% |
+| IA3 guide patch K=80k | 15.5% | 50/100 | 50% |
+| IA3 guide patch K=160k | 12.0% | 44/100 | 44% |
+| IA3 guide patch K=320k | 9.0% | 47/100 | 47% |
+| Grad on-policy K=1000, s=1 | 17.0% | 47/100 | 47% |
+| Grad on-policy K=2000, s=1 | 9.5% | 45/100 | 45% |
+| Grad on-policy K=4000, s=1 | 5.5% | 41/100 | 41% |
+
+The complete trajectories do not all show a monotone MATH cost. The clearest
+dose-ordered point estimate remains Grad (48% baseline to 47%, 45%, and 41% as
+K rises). SN-Tune alpha 1 and guide-patch K=80k are above the baseline point
+estimate, while their neighboring scales fluctuate. Since this is a fixed
+n=100 subset, these differences should be treated as screening estimates, not
+as individually resolved effects.
+
+## Initial six-condition paired analysis
 
 | Condition | Correct | Accuracy | Delta vs. baseline |
 |---|---:|---:|---:|
@@ -94,3 +134,7 @@ conditions, the 50 examples inherited from the prior subset also reproduce all
 - Grad K=4000: `results/math500_l1_l3_n100_grad_onpolicy_expanded_k4000_s1_fp32/`
 - SN-Tune: `results/math500_l1_l3_n100_sn_alpha6_fp32/`
 - IA3-SFT alpha 3: `results/math500_l1_l3_n100_ia3_sft_snraw_alpha3_fp32/`
+- Complete numeric table: `results/ifeval_harmbench_tradeoff.csv`
+- Updated safety–MATH figure: `figures/math500_harmbench_tradeoff_main_only.png`
+- Guide-patch batch benchmark:
+  `results/math500_benchmark_sft_patch_snraw_alpha3_top80k_bf16/benchmark.json`

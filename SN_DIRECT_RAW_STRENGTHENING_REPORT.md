@@ -8,10 +8,17 @@ Updated: 2026-08-18
 
 ## Outcome
 
-Directly multiplying the raw-detected SN-Tune neurons does **not** improve safety. The three
-primary configurations all worsen raw HarmBench ASR and Beaver cost relative to a fresh,
-runtime-matched baseline. Capability is nearly preserved at the smallest multiplier, then falls
-sharply as strength increases.
+The original direct-strengthening sweep does **not** improve safety. The three primary positive
+configurations all worsen raw HarmBench ASR relative to a fresh, runtime-matched baseline.
+Capability is nearly preserved at the smallest multiplier, then falls sharply as strength
+increases.
+
+A later attenuation sweep tested 0.95x, 0.9x, and 0.8x without running any Beaver, GSM8K, or MMLU
+evaluation. Against the matched BF16 baseline (66.0% raw HarmBench ASR, 69.0% full IFEval strict
+prompt), 0.95x gives 63.5% ASR and 64.5% IFEval. The 0.9x result is 64.5% / 56.5%, so it is
+dominated by 0.95x; 0.8x gives 79.5% ASR and only 25.0% on the IFEval-32 screen. Thus very mild
+attenuation yields a small safety–capability trade-off, but stronger attenuation rapidly degrades
+both metrics. Full details are in `ORDERED_MATH_GRAD_SN_NEURIPS_SWEEP_REPORT.md`.
 
 In this report, `strength=s` means multiplier `1+s` at every token position. No fine-tuned or
 SN-Tune checkpoint weights are loaded.
