@@ -17,6 +17,25 @@ from 68.75% to 75.0%. Amplification consistently worsens safety, reaching 76.5% 
 | 1.2x | 70.0% | 34 | 68.75% |
 | 1.4x | 76.5% | 43 | not run |
 
+### Neurons identified by SNCorpus raw SFT IA3
+
+A separate top-20k ranking compared base Llama-3 with the in-scope SNCorpus raw SFT IA3 guide at
+`alpha=3`, using 200 raw SN-heldout prompts disjoint from its first 256 training records. This
+ranking has the opposite tendency from the DPO ranking: attenuation worsens raw HarmBench, while
+mild amplification gives a small improvement.
+
+| IA3-SFT-identified multiplier | Raw HarmBench ASR ↓ (n=200) | Repetitive /200 | Unsafe→safe / safe→unsafe vs. 1.0x |
+|---:|---:|---:|---:|
+| 0.6x | 75.0% | 21 | 7 / 22 |
+| 0.8x | 71.0% | 27 | 8 / 15 |
+| 1.0x (no-op) | 67.5% | 28 | -- |
+| **1.2x** | **65.0%** | **31** | **15 / 10** |
+| 1.4x | 65.0% | 40 | 21 / 16 |
+
+`1.2x` is preferred over `1.4x` because it obtains the same ASR with less repetition. Its
+2.5-point ASR improvement is not statistically reliable on this sample (paired exact p=0.424), so
+the result is evidence of directionality rather than a confirmed safety gain.
+
 For the raw-detected SN cap-25 mask, only very mild attenuation helps. Against the matched BF16
 baseline (66.0% HarmBench ASR; 69.0% full IFEval strict prompt), `0.95x` lowers ASR to 63.5% but
 also lowers IFEval to 64.5%. `0.9x` is dominated by `0.95x`, and `0.8x` damages both safety and
@@ -53,13 +72,15 @@ coarser intervention and does not reproduce the learned update.
 
 ## Conclusion
 
-Unsigned amplification is not a safety intervention for either neuron set. NeurIPS-ranked neurons
-show a promising narrow `0.8x` attenuation regime, but the capability result is preliminary until
-confirmed on full IFEval. SN attenuation provides clearer trade-off evidence at `0.95x`: a
+The direction is ranking-dependent. DPO-identified NeurIPS neurons show a promising narrow `0.8x`
+attenuation regime, whereas IA3-SFT-identified neurons weakly favor `1.2x` amplification. The DPO
+capability result is preliminary until confirmed on full IFEval, and the IA3-SFT HarmBench gain is
+not statistically reliable. SN attenuation provides clearer trade-off evidence at `0.95x`: a
 2.5-point ASR improvement costs 4.5 points of IFEval accuracy, and stronger attenuation quickly
-becomes destructive.
+becomes destructive. Unsigned SN amplification is not a safety intervention.
 
 Protocol: Meta-Llama-3-8B-Instruct; all-token activation scaling; raw HarmBench-200; greedy
 decoding. NeurIPS uses the Instruct-vs-DPO top-20k post-MLP ranking in FP32. SN uses the raw
 ranked expanded-K/V detector mask with cap 25 per layer/structure in BF16. No fine-tuned weights
-or guide model are loaded.
+or guide model are loaded at evaluation time. The IA3-SFT-identified sweep likewise scales the
+base model directly; its SNCorpus raw SFT IA3 guide is used only to construct the ranking.
