@@ -43,6 +43,10 @@ delta has mean absolute value `0.00004643`: only **0.407%** of the original mean
 The relative L2 norm is **0.303%**. The median absolute delta is `0.00004984` and the maximum is
 `0.00009797`; the tuned weights' mean absolute value remains `0.011395`.
 
+The count is approximately 2,349 selected neuron dimensions (parameter rows or columns) times
+4,096 scalar weights per dimension: `2,349 × 4,096 ≈ 9.62 million`. The exact count includes
+only entries whose saved value differs from the base checkpoint.
+
 Thus SN-Tune succeeds through small, signed, distributed weight updates. These ratios are not an
 activation multiplier: directly multiplying every selected activation by 1.05x or more is a much
 coarser intervention and does not reproduce the learned update.
