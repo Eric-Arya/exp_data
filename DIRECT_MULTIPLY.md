@@ -20,7 +20,8 @@ from 68.75% to 75.0%. Amplification consistently worsens safety, reaching 76.5% 
 For the raw-detected SN cap-25 mask, only very mild attenuation helps. Against the matched BF16
 baseline (66.0% HarmBench ASR; 69.0% full IFEval strict prompt), `0.95x` lowers ASR to 63.5% but
 also lowers IFEval to 64.5%. `0.9x` is dominated by `0.95x`, and `0.8x` damages both safety and
-capability.
+capability. Amplification was also tested from `1.05x` through `2.0x`; every point worsens safety,
+with the larger multipliers becoming almost completely repetitive.
 
 | SN multiplier | Raw HarmBench ASR ↓ (n=200) | Repetitive /200 | IFEval strict prompt ↑ |
 |---:|---:|---:|---:|
@@ -28,6 +29,11 @@ capability.
 | **0.95x** | **63.5%** | 32 | **64.5% (n=200)** |
 | 0.9x | 64.5% | 27 | 56.5% (n=200) |
 | 0.8x | 79.5% | 54 | 25.0% (n=32) |
+| 1.05x | 70.0% | 24 | not run on IFEval |
+| 1.10x | 73.0% | 42 | not run on IFEval |
+| 1.20x | 86.5% | 127 | not run on IFEval |
+| 1.50x | 99.5% | 198 | not run on IFEval |
+| 2.00x | 100.0% | 200 | not run on IFEval |
 
 ## Conclusion
 
